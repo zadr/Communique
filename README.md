@@ -4,7 +4,7 @@ Communiqué is an experiment. It's a Twitter app that only lets you use direct m
 
 Under the hood, Communiqué supports multiple accounts, but no UI exists for this. Likewise, the bits to support loading more than 200 direct messages exist, but, Communiqué doesn't actively make use of it.
 
-There's a lot of of hacks and bad code in here. Some of it is annotated with `// WARNING:`, but even more of it exists without any heads up. For example, most things that gets `.unique()` applied can probably be considered a hack. Caveat programmer.
+There's a lot of of hacks and bad code in here. Some of it is annotated with `// WARNING:`, but even more of it exists without any heads up. Caveat programmer. All I ask is that you remember that this code does something, and that building things is almost always, unquestionably, really cool.
 
 You'll need your own Twitter API consumer key and consumer secret for the app to do anything. Once you have them, fill in the constants at the top of Twitter.swift.
 
