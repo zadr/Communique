@@ -1,8 +1,8 @@
 import Foundation
 
 public protocol LoginHelper: class {
-	func client(client: Client, encounteredOAuthURL URL: NSURL)
-	func client(client: Client, completedLoginAttempt successfully: Bool, forSession session: Session)
+	func client(_ client: Client, encounteredOAuthURL URL: URL)
+	func client(_ client: Client, completedLoginAttempt successfully: Bool, forSession session: Session)
 }
 
 public protocol Client {
@@ -18,30 +18,30 @@ public protocol Client {
 public protocol OAuthClient: Client {
 	var loginHelper: LoginHelper? { get set }
 
-	func handleLoginResponse(response: [String: AnyObject])
+	func handleLoginResponse(_ response: [String: AnyObject])
 }
 
 public enum FeedType: Int {
-	case Home // all followers activity
-	case UserActivity // @replies, or activity feed
-	case PersonalMessages // private messages
+	case home // all followers activity
+	case userActivity // @replies, or activity feed
+	case personalMessages // private messages
 }
 
-public typealias FetchResponse = ([Item]?, NSError?) -> Void
+public typealias FetchResponse = ([Item]?, NSError?) -> ()
 
 public protocol Session {
-	func fetch(feed: FeedType, since: String?, handler: FetchResponse?)
-	func post(feed: FeedType, message: String, to: Person)
-	func remove(item: Item, feed: FeedType)
-	func block(person: Person)
-	func reportSpam(person: Person)
+	func fetch(_ feed: FeedType, since: String?, handler: FetchResponse?)
+	func post(_ feed: FeedType, message: String, to: Person)
+	func remove(_ item: Item, feed: FeedType)
+	func block(_ person: Person)
+	func reportSpam(_ person: Person)
 
 	var title: String { get }
 	var username: String { get }
 }
 
 public class Person: Equatable {
-	let avatar: NSURL
+	let avatar: URL
 	let displayName: String
 	let username: String
 	let id: String
@@ -50,7 +50,7 @@ public class Person: Equatable {
 	let location: String
 
 	init(dictionary: [String: AnyObject]) {
-		avatar = NSURL(string: dictionary["profile_image_url_https"] as! String)!
+		avatar = URL(string: dictionary["profile_image_url_https"] as! String)!
 		displayName = dictionary["name"] as! String
 		username = dictionary["screen_name"] as! String
 		id = dictionary["id_str"] as! String
@@ -86,7 +86,7 @@ public class Item: Equatable {
 		self.people = [ to ]
 		self.message = message
 		self.date = ""
-		self.id = NSUUID().UUIDString
+		self.id = UUID().uuidString
 	}
 }
 
@@ -96,12 +96,10 @@ public func ==(lhs: Item, rhs: Item) -> Bool {
 
 extension Person {
 	var displayValue: String {
-		get {
-			if NSUserDefaults.standardUserDefaults().boolForKey("show-user-names") {
-				return username
-			}
+        if UserDefaults.standard.bool(forKey: "show-user-names") {
+            return username
+        }
 
-			return displayName
-		}
+        return displayName
 	}
 }

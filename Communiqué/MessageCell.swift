@@ -17,14 +17,14 @@ class MessageCell: UITableViewCell {
 		let imageView = self.imageView!
 
 		if let image = imageView.image {
-			var frame = CGRectZero
+			var frame = CGRect.zero
 			frame.size = image.size
 
 			if imageOnLeft {
-				frame.origin = CGPointZero
+				frame.origin = CGPoint.zero
 				frame.origin.x += 10.0
 			} else {
-				frame.origin = CGPointMake(CGRectGetWidth(contentView.frame) - image.size.width, 0.0)
+				frame.origin = CGPoint(x: contentView.frame.width - image.size.width, y: 0.0)
 				frame.origin.x -= 10.0
 			}
 
@@ -39,19 +39,19 @@ class MessageCell: UITableViewCell {
 		}
 
 		var frame = detailTextLabel!.frame
-		frame.size.width = CGRectGetWidth(self.frame) - CGRectGetWidth(imageView.frame) - 30.0
+		frame.size.width = self.frame.width - imageView.frame.width - 30.0
 
 		if imageOnLeft {
-			detailTextLabel!.textAlignment = .Left
+			detailTextLabel!.textAlignment = .left
 
-			let imageViewMaxX = CGRectGetMaxX(imageView.frame)
+			let imageViewMaxX = imageView.frame.maxX
 			if imageViewMaxX > 0.0 {
 				frame.origin.x = imageViewMaxX + 10.0
 			} else {
 				frame.origin.x = 20.0
 			}
 		} else {
-			detailTextLabel!.textAlignment = .Right
+			detailTextLabel!.textAlignment = .right
 
 			frame.origin.x = 10.0
 		}

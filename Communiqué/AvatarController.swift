@@ -10,16 +10,16 @@
 
 public protocol AvatarProvider {
 	init()
-	func avatar(person: Person, completion: () -> Void) -> AvatarType?
+	func avatar(_ person: Person, completion: () -> ()) -> AvatarType?
 }
 
 public class AvatarController: AvatarProvider {
-	private lazy var cache = NSCache()
-	private lazy var fetching = Set<NSURL>()
+	private var cache = NSCache<NSString, AvatarType>()
+	private lazy var fetching = Set<URL>()
 
 	public required init() {}
 
-	public func avatar(person: Person, completion: () -> Void) -> AvatarType? {
+	public func avatar(_ person: Person, completion: () -> ()) -> AvatarType? {
 		if let avatar = avatarFromMemory(person) {
 			return avatar
 		}
@@ -34,31 +34,31 @@ public class AvatarController: AvatarProvider {
 
 		fetching.insert(person.avatar)
 
-		NSURLSession.sharedSession().dataTaskWithURL(person.avatar, completionHandler: { [weak self] (data, response, error) -> Void in
+		URLSession.shared.dataTask(with: person.avatar, completionHandler: { [weak self] (data, response, error) -> () in
 			guard let this = self else { return }
 
 			this.fetching.remove(person.avatar)
 
-			if let data = data where data.length > 0 {
+			if let data = data, data.count > 0 {
 				this.saveAvatar(data, forPerson: person)
 
-				dispatch_async(dispatch_get_main_queue(), completion)
+				DispatchQueue.main.async(execute: completion)
 			}
 		}).resume()
 
 		return nil
 	}
 
-	private func avatarFromMemory(person: Person) -> AvatarType? {
-		return cache.objectForKey(person.avatar.lastPathComponent!) as? AvatarType
+	private func avatarFromMemory(_ person: Person) -> AvatarType? {
+		return cache.object(forKey: person.avatar.lastPathComponent)
 	}
 
-	private func avatarFromDisk(person: Person) -> AvatarType? {
+	private func avatarFromDisk(_ person: Person) -> AvatarType? {
 		guard let avatarPath = localPath(person) else {
 			return nil
 		}
 
-		guard let avatarData = NSData(contentsOfURL: avatarPath) else {
+		guard let avatarData = try? Data(contentsOf: avatarPath) else {
 			return nil
 		}
 
@@ -66,40 +66,38 @@ public class AvatarController: AvatarProvider {
 			return nil
 		}
 
-		cache.setObject(avatar, forKey: person.avatar.lastPathComponent!, cost: avatarData.length)
+		cache.setObject(avatar, forKey: person.avatar.lastPathComponent, cost: avatarData.count)
 
 		return avatar
 	}
 
-	private func saveAvatar(data: NSData, forPerson person: Person) {
-		let fileManger = NSFileManager()
+	private func saveAvatar(_ data: Data, forPerson person: Person) {
+		let fileManger = FileManager()
 		let avatarCacheDirectory = cacheDirectory()!
-		if !fileManger.fileExistsAtPath(avatarCacheDirectory.absoluteString) {
-			let _ = try? fileManger.createDirectoryAtURL(avatarCacheDirectory, withIntermediateDirectories: true, attributes: nil)
+		if !fileManger.fileExists(atPath: avatarCacheDirectory.absoluteString) {
+			let _ = try? fileManger.createDirectory(at: avatarCacheDirectory, withIntermediateDirectories: true, attributes: nil)
 		}
 
 		if let path = localPath(person) {
-			data.writeToURL(path, atomically: true)
+			try? data.write(to: path, options: [.atomic])
 		}
 	}
 
-	private func cacheDirectory() -> NSURL? {
-		guard let cacheDirectory = NSSearchPathForDirectoriesInDomains(.CachesDirectory, .UserDomainMask, true).first else {
+	private func cacheDirectory() -> URL? {
+		guard let cacheDirectory = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first else {
 			return nil
 		}
 
-		return NSURL(fileURLWithPath: cacheDirectory).URLByAppendingPathComponent("Avatars")
+		return URL(fileURLWithPath: cacheDirectory).appendingPathComponent("Avatars")
 	}
 
-	private func localPath(person: Person) -> NSURL? {
+	private func localPath(_ person: Person) -> URL? {
 		guard let avatarDirectory = cacheDirectory() else {
 			return nil
 		}
 
-		guard let key = person.avatar.lastPathComponent else {
-			return nil
-		}
+		let key = person.avatar.lastPathComponent
 
-		return avatarDirectory.URLByAppendingPathComponent(key)
+		return avatarDirectory.appendingPathComponent(key)
 	}
 }

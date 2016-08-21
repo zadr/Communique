@@ -8,7 +8,7 @@ class ConversationListViewController: UITableViewController, SessionDisplay {
 
 	lazy var textField = UITextField()
 
-	let id: String = NSUUID().UUIDString
+	let id: String = UUID().uuidString
 
 	init(sessionController: SessionController, avatarController: AvatarProvider, people: [Person]) {
 		self.sessionController = sessionController
@@ -29,67 +29,67 @@ class ConversationListViewController: UITableViewController, SessionDisplay {
 	override func viewDidLoad() {
 		super.viewDidLoad()
 
-		view.backgroundColor = UIColor.whiteColor()
+		view.backgroundColor = UIColor.white
 
-		title = people.map({ return $0.displayValue }).joinWithSeparator(", ")
+		title = people.map({ return $0.displayValue }).joined(separator: ", ")
 		tableView.tableFooterView = UIView()
 
 		refreshControl = UIRefreshControl()
-		refreshControl!.addTarget(self, action: "refresh:", forControlEvents: [ .ValueChanged ])
+		refreshControl!.addTarget(self, action: #selector(refresh(_:)), for: [ .valueChanged ])
 		tableView.addSubview(refreshControl!)
 
-		textField.autoresizingMask = [ .FlexibleWidth, .FlexibleRightMargin ]
-		textField.borderStyle = .RoundedRect
-		textField.backgroundColor = UIColor.whiteColor()
+		textField.autoresizingMask = [ .flexibleWidth, .flexibleRightMargin ]
+		textField.borderStyle = .roundedRect
+		textField.backgroundColor = .white
 		textField.layer.borderWidth = 1.0
-		textField.layer.borderColor = UIColor.lightGrayColor().CGColor
+		textField.layer.borderColor = UIColor.lightGray.cgColor
 		textField.layer.cornerRadius = 3.0
 
-		NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillShow:", name: UIKeyboardWillShowNotification, object: nil)
-		NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillHide:", name: UIKeyboardWillHideNotification, object: nil)
+		NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+		NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
 
-		self.toolbarItems = [
+		toolbarItems = [
 			UIBarButtonItem(customView: textField),
-			UIBarButtonItem(title: "Send", style: .Plain, target: self, action: "done:")
+			UIBarButtonItem(title: "Send", style: .plain, target: self, action: #selector(done(_:)))
 		]
 	}
 
-	override func viewWillDisappear(animated: Bool) {
+	override func viewWillDisappear(_ animated: Bool) {
 		super.viewWillDisappear(animated)
 
 		textField.resignFirstResponder()
 
-		NSNotificationCenter.defaultCenter().removeObserver(self, name: UIKeyboardWillShowNotification, object: nil)
-		NSNotificationCenter.defaultCenter().removeObserver(self, name: UIKeyboardWillHideNotification, object: nil)
+		NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+		NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
 	}
 
-	@IBAction private func keyboardWillShow(notification: NSNotification) {
-		let keyboardRectValue = notification.userInfo![UIKeyboardFrameEndUserInfoKey] as! NSValue
-		let keyboardRect = keyboardRectValue.CGRectValue()
+	@objc private func keyboardWillShow(_ notification: Notification) {
+		let keyboardRectValue = (notification).userInfo![UIKeyboardFrameEndUserInfoKey] as! NSValue
+		let keyboardRect = keyboardRectValue.cgRectValue
 
-		let animationDurationValue = notification.userInfo![UIKeyboardAnimationDurationUserInfoKey] as! NSNumber
+		let animationDurationValue = (notification).userInfo![UIKeyboardAnimationDurationUserInfoKey] as! NSNumber
 		let animationDuration = animationDurationValue.doubleValue
 
-		let animationCurveValue = notification.userInfo![UIKeyboardAnimationCurveUserInfoKey] as! NSNumber
-		let animationCurve = UIViewAnimationOptions(rawValue: animationCurveValue.unsignedIntegerValue)
+		let animationCurveValue = (notification).userInfo![UIKeyboardAnimationCurveUserInfoKey] as! NSNumber
+		let animationCurve = UIViewAnimationOptions(rawValue: animationCurveValue.uintValue)
 
-		UIView.animateWithDuration(animationDuration, delay: 0.0, options: animationCurve, animations: { [ weak self] in
+		UIView.animate(withDuration: animationDuration, delay: 0.0, options: animationCurve, animations: { [ weak self] in
 			guard let this = self else { return }
 
 			var frame = this.navigationController!.view.frame
-			frame.size.height = CGRectGetMinY(keyboardRect)
+			frame.size.height = keyboardRect.minY
 			this.navigationController!.view.frame = frame
 		}, completion: nil)
 	}
 
-	@IBAction private func keyboardWillHide(notification: NSNotification) {
-		let animationDurationValue = notification.userInfo![UIKeyboardAnimationDurationUserInfoKey] as! NSNumber
+	@objc private func keyboardWillHide(_ notification: Notification) {
+		let animationDurationValue = (notification).userInfo![UIKeyboardAnimationDurationUserInfoKey] as! NSNumber
 		let animationDuration = animationDurationValue.doubleValue
 
-		let animationCurveValue = notification.userInfo![UIKeyboardAnimationCurveUserInfoKey] as! NSNumber
-		let animationCurve = UIViewAnimationOptions(rawValue: animationCurveValue.unsignedIntegerValue)
+		let animationCurveValue = (notification).userInfo![UIKeyboardAnimationCurveUserInfoKey] as! NSNumber
+		let animationCurve = UIViewAnimationOptions(rawValue: animationCurveValue.uintValue)
 
-		UIView.animateWithDuration(animationDuration, delay: 0.0, options: animationCurve, animations: { [weak self] in
+		UIView.animate(withDuration: animationDuration, delay: 0.0, options: animationCurve, animations: { [weak self] in
 			guard let this = self else { return }
 			guard let _ = this.navigationController else { return }
 
@@ -98,26 +98,26 @@ class ConversationListViewController: UITableViewController, SessionDisplay {
 	}
 
 	private func resetNavigationControllerFrame() {
-		var frame = self.navigationController!.view.frame
-		frame.size.height = CGRectGetHeight(UIApplication.sharedApplication().keyWindow!.frame)
-		self.navigationController!.view.frame = frame
+		var frame = navigationController!.view.frame
+		frame.size.height = UIApplication.shared.keyWindow!.frame.height
+		navigationController!.view.frame = frame
 	}
 
-	@IBAction private func refresh(sender: AnyObject? = nil) {
+	@IBAction private func refresh(_ sender: AnyObject? = nil) {
 		sessionController.fetch()
 	}
 
-	@IBAction private func done(sender: AnyObject? = nil) {
+	@IBAction private func done(_ sender: AnyObject? = nil) {
 		textField.resignFirstResponder()
 
-		if let text = textField.text where text.utf8.count > 0 {
-			sessionController.post(.PersonalMessages, message: text, to: people.first!)
+		if let text = textField.text, text.utf8.count > 0 {
+			sessionController.post(.personalMessages, message: text, to: people.first!)
 		}
 
 		textField.text = nil
 	}
 
-	override func viewWillAppear(animated: Bool) {
+	override func viewWillAppear(_ animated: Bool) {
 		super.viewWillAppear(animated)
 
 		navigationController?.setToolbarHidden(false, animated: true)
@@ -134,33 +134,31 @@ class ConversationListViewController: UITableViewController, SessionDisplay {
 		textField.frame = frame
 	}
 
-	func sessionController(sessionController: SessionController, didLoadItems items: [Item], forFeed: FeedType) {
+	func sessionController(_ sessionController: SessionController, didLoadItems items: [Item], forFeed: FeedType) {
 		tableView.reloadData()
 		refreshControl!.endRefreshing()
 	}
 
 	private var items: [Item] {
-		get {
-			let items = sessionController.itemsForFeedType(.PersonalMessages)
-			return items.filter({
-				let to = people.contains($0.sender)
-				let from = $0.people == people
+        let items = sessionController.itemsForFeedType(.personalMessages)
+        return items.filter({
+            let to = people.contains($0.sender)
+            let from = $0.people == people
 
-				return to || from
-			}).sort({ (first, second) -> Bool in
-				return first.id > second.id
-			})
-		}
+            return to || from
+        }).sorted(by: { (first, second) -> Bool in
+            return first.id > second.id
+        })
 	}
 
-	override func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
-		let item = items.reverse()[indexPath.row]
+	override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+		let item = items.reversed()[indexPath.row]
 
 		// WARNING: ugly
 		if item.sender.username == sessionController.session.username {
 			return [
-				UITableViewRowAction(style: .Default, title: "Delete", handler: { (action, indexPath) -> Void in
-					self.sessionController.remove(item, type: .PersonalMessages)
+				UITableViewRowAction(style: .default, title: "Delete", handler: { (action, indexPath) -> () in
+					self.sessionController.remove(item, type: .personalMessages)
 				})
 			]
 		}
@@ -168,8 +166,8 @@ class ConversationListViewController: UITableViewController, SessionDisplay {
 		return nil
 	}
 
-	override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-		let cell = self.tableView(tableView, cellForRowAtIndexPath: indexPath)
+	override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+		let cell = self.tableView(tableView, cellForRowAt: indexPath)
 
 		cell.setNeedsLayout()
 		cell.layoutIfNeeded()
@@ -177,28 +175,28 @@ class ConversationListViewController: UITableViewController, SessionDisplay {
 		return 20.0 + max(cell.detailTextLabel!.frame.size.height, cell.imageView!.frame.size.height)
 	}
 
-	override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+	override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
 		return items.count
 	}
 
-	override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-		var cell = tableView.dequeueReusableCellWithIdentifier("cell") as? MessageCell
+	override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+		var cell = tableView.dequeueReusableCell(withIdentifier: "cell") as? MessageCell
 		if cell == nil {
-			cell = MessageCell(style: .Subtitle, reuseIdentifier: "cell")
+			cell = MessageCell(style: .subtitle, reuseIdentifier: "cell")
 			cell?.detailTextLabel?.numberOfLines = 0
 		}
 
-		cell?.separatorInset = UIEdgeInsetsZero
+		cell?.separatorInset = UIEdgeInsets.zero
 
-		let item = items.reverse()[indexPath.row]
-		let previousItem = items.reverse()[max(0, indexPath.row - 1)]
+		let item = items.reversed()[indexPath.row]
+		let previousItem = items.reversed()[max(0, indexPath.row - 1)]
 
 		// WARNING: ugly
 		cell?.imageOnLeft = item.sender.username != sessionController.session.username
 
 		if indexPath.row == 0 || previousItem.sender != item.sender {
-			cell!.imageView!.image = avatarController.avatar(item.sender) { (avatar) -> Void in
-				tableView.reloadRowsAtIndexPaths([ indexPath ], withRowAnimation: .Fade)
+			cell!.imageView!.image = avatarController.avatar(item.sender) { (avatar) -> () in
+				tableView.reloadRows(at: [ indexPath ], with: .fade)
 
 				cell!.setNeedsLayout()
 			}

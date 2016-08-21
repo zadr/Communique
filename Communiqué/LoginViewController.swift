@@ -14,14 +14,14 @@ public class LoginViewController: UIViewController {
 	public override func viewDidLoad() {
 		super.viewDidLoad()
 
-		view.backgroundColor = UIColor.whiteColor()
+		view.backgroundColor = .white
 
-		let button = UIButton(type: .Custom)
-		button.addTarget(self, action: "login:", forControlEvents: [ .TouchUpInside ])
-		button.setTitle("Log In", forState: .Normal)
-		button.setTitleColor(UIColor.blackColor(), forState: [ .Normal ])
+		let button = UIButton(type: .custom)
+		button.addTarget(self, action: #selector(login(_:)), for: [ .touchUpInside ])
+		button.setTitle("Log In", for: .normal)
+		button.setTitleColor(.black, for: UIControlState())
 
-		button.titleLabel?.font = UIFont.systemFontOfSize(24.0, weight: UIFontWeightLight)
+		button.titleLabel?.font = UIFont.systemFont(ofSize: 24.0, weight: UIFontWeightLight)
 
 		view.addSubview(button)
 
@@ -30,17 +30,17 @@ public class LoginViewController: UIViewController {
 		button.center = view.center
 	}
 
-	@IBAction private func login(sender: AnyObject?) {
+	@IBAction private func login(_ sender: AnyObject?) {
 		client.login()
 	}
 }
 
 extension LoginViewController: LoginHelper {
-	public func client(client: Client, encounteredOAuthURL URL: NSURL) {
-		UIApplication.sharedApplication().openURL(URL)
+	public func client(_ client: Client, encounteredOAuthURL URL: Foundation.URL) {
+		UIApplication.shared.openURL(URL)
 	}
 
-	public func client(client: Client, completedLoginAttempt successfully: Bool, forSession session: Session) {
+	public func client(_ client: Client, completedLoginAttempt successfully: Bool, forSession session: Session) {
 		// do nothing
 	}
 }

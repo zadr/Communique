@@ -1,13 +1,13 @@
 import Security
 
 protocol KeychainEssentials {
-	func setPassword(password: String, forServer server: String, area: String?, displayValue: String?)
-	func passwordForServer(server: String, area: String?) -> String?
-	func removePasswordForServer(server: String, area: String?)
+	func setPassword(_ password: String, forServer server: String, area: String?, displayValue: String?)
+	func passwordForServer(_ server: String, area: String?) -> String?
+	func removePasswordForServer(_ server: String, area: String?)
 }
 
 public class Keychain: KeychainEssentials {
-	private func keychainDictionary(server: String, account: String?) -> [String: AnyObject] {
+	private func keychainDictionary(_ server: String, account: String?) -> [String: AnyObject] {
 		var dictionary = [String: AnyObject]()
 		dictionary[String(kSecClass)] = String(kSecClassInternetPassword)
 		dictionary[String(kSecAttrServer)] = server
@@ -21,13 +21,13 @@ public class Keychain: KeychainEssentials {
 
 	// MARK: -
 
-	func setPassword(password: String, forServer server: String, area: String? = nil, displayValue: String? = nil) {
+	func setPassword(_ password: String, forServer server: String, area: String? = nil, displayValue: String? = nil) {
 		var entry = keychainDictionary(server, account: area)
-		if let displayValue = displayValue where displayValue.utf8.count > 0 {
+		if let displayValue = displayValue, displayValue.utf8.count > 0 {
 			entry[String(kSecAttrLabel)] = displayValue
 		}
 
-		if let asData = password.dataUsingEncoding(NSUTF8StringEncoding) {
+		if let asData = password.data(using: String.Encoding.utf8) {
 			entry[String(kSecValueData)] = asData
 		}
 
@@ -35,13 +35,13 @@ public class Keychain: KeychainEssentials {
 		if status == errSecDuplicateItem {
 			let update: [String: AnyObject] = [String(kSecValueData): entry[String(kSecValueData)]!]
 
-			entry.removeValueForKey(String(kSecValueData))
+			entry.removeValue(forKey: String(kSecValueData))
 
 			SecItemUpdate(entry as NSDictionary, update as NSDictionary)
 		}
 	}
 
-	func passwordForServer(server: String, area: String? = nil) -> String? {
+	func passwordForServer(_ server: String, area: String? = nil) -> String? {
 		var entry = keychainDictionary(server, account:  area)
 		entry[String(kSecReturnData)] = kCFBooleanTrue
 		entry[String(kSecMatchLimit)] = String(kSecMatchLimitOne)
@@ -49,14 +49,14 @@ public class Keychain: KeychainEssentials {
 		var data: CFTypeRef?
 		let status = SecItemCopyMatching(entry as NSDictionary, &data)
 
-		if let data = data where status == noErr {
-			return NSString(data: data as! NSData, encoding: NSUTF8StringEncoding) as? String
+		if let data = data, status == noErr {
+			return NSString(data: data as! Data, encoding: String.Encoding.utf8.rawValue) as? String
 		}
 
 		return nil
 	}
 
-	func removePasswordForServer(server: String, area: String? = nil) {
+	func removePasswordForServer(_ server: String, area: String? = nil) {
 		SecItemDelete(keychainDictionary(server, account: area) as NSDictionary)
 	}
 }

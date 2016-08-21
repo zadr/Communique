@@ -1,18 +1,18 @@
 public protocol SessionDisplay: class {
-	func sessionController(sessionController: SessionController, didLoadItems items: [Item], forFeed: FeedType)
+	func sessionController(_ sessionController: SessionController, didLoadItems items: [Item], forFeed: FeedType)
 	var id: String { get }
 }
 
 public protocol SessionControllerType: class {
 	init(session: Session, feedTypes: [FeedType])
 
-	func addObserver(observer: SessionDisplay)
-	func removeObserver(observer: SessionDisplay)
+	func addObserver(_ observer: SessionDisplay)
+	func removeObserver(_ observer: SessionDisplay)
 
 	func fetch()
-	func block(person: Person)
-	func reportSpam(person: Person)
-	func post(feed: FeedType, message: String, to person: Person)
+	func block(_ person: Person)
+	func reportSpam(_ person: Person)
+	func post(_ feed: FeedType, message: String, to person: Person)
 
 	var title: String { get }
 	var session: Session { get }
@@ -32,24 +32,24 @@ public class SessionController: NSObject, FeedLoading, SessionControllerType {
 
 		super.init()
 
-		self.feedControllers.forEach({ $0.feedLoading = self })
+		self.feedControllers.forEach { $0.feedLoading = self }
 	}
 
-	public func remove(item: Item, type: FeedType) {
-		self.session.remove(item, feed: type)
+	public func remove(_ item: Item, type: FeedType) {
+		session.remove(item, feed: type)
 	}
 
-	public func block(person: Person) {
+	public func block(_ person: Person) {
 		session.block(person)
 		feedControllers.forEach({ $0.remove(person) })
 	}
 
-	public func reportSpam(person: Person) {
+	public func reportSpam(_ person: Person) {
 		session.reportSpam(person)
 		feedControllers.forEach({ $0.remove(person) })
 	}
 
-	public func post(feedType: FeedType, message: String, to target: Person) {
+	public func post(_ feedType: FeedType, message: String, to target: Person) {
 		session.post(feedType, message: message, to: target)
 
 		let feedController = feedControllers.filter({
@@ -66,7 +66,7 @@ public class SessionController: NSObject, FeedLoading, SessionControllerType {
 		feedController.add(newItem)
 	}
 
-	public func itemsForFeedType(feedType: FeedType) -> [Item] {
+	public func itemsForFeedType(_ feedType: FeedType) -> [Item] {
 		return feedControllers.filter({ return $0.feedType == feedType }).first!.items
 	}
 
@@ -74,37 +74,35 @@ public class SessionController: NSObject, FeedLoading, SessionControllerType {
 		feedControllers.forEach({ $0.fetch() })
 	}
 
-	func feed(feedController: FeedController, didLoadItems items: [Item], inFeed feed: FeedType) {
+	func feed(_ feedController: FeedController, didLoadItems items: [Item], inFeed feed: FeedType) {
 		observers.forEach({
 			$0.sessionController(self, didLoadItems: items, forFeed: feed)
 		})
 	}
 
-	public func addObserver(observer: SessionDisplay) {
+	public func addObserver(_ observer: SessionDisplay) {
 		observers.append(observer)
 	}
 
-	public func removeObserver(observer: SessionDisplay) {
-		if let index = observers.indexOf({ return $0.id == observer.id }) {
-			observers.removeAtIndex(index)
+	public func removeObserver(_ observer: SessionDisplay) {
+		if let index = observers.index(where: { return $0.id == observer.id }) {
+			observers.remove(at: index)
 		}
 	}
 
 	public var title: String {
-		get {
-			return session.title
-		}
+        return session.title
 	}
 }
 
 internal protocol FeedLoading {
-	func feed(feedController: FeedController, didLoadItems items: [Item], inFeed feed: FeedType)
+	func feed(_ feedController: FeedController, didLoadItems items: [Item], inFeed feed: FeedType)
 }
 
 internal protocol FeedLoader {
 	func fetch()
-	func add(item: Item)
-	func remove(person: Person)
+	func add(_ item: Item)
+	func remove(_ person: Person)
 
 	var feedLoading: FeedLoading? { get set }
 }
@@ -123,7 +121,7 @@ internal class FeedController: FeedLoader {
 		self.feedType = feedType
 	}
 
-	internal func add(item: Item) {
+	internal func add(_ item: Item) {
 		items.append(item)
 
 		if let feedLoading = feedLoading {
@@ -131,7 +129,7 @@ internal class FeedController: FeedLoader {
 		}
 	}
 
-	internal func remove(person: Person) {
+	internal func remove(_ person: Person) {
 		items = items.filter({ $0.sender != person })
 
 		if let feedLoading = feedLoading {
@@ -141,7 +139,7 @@ internal class FeedController: FeedLoader {
 
 	internal func fetch() {
 		session.fetch(feedType, since: since, handler: { (items: [Item]?, error: NSError?) in
-			if let feedLoading = self.feedLoading, items = items {
+			if let feedLoading = self.feedLoading, let items = items {
 				if !items.isEmpty {
 					self.since = items.last!.date
 				}
