@@ -36,6 +36,9 @@
 		B6AD0DED1C1E03B90038D7E8 /* ArrayExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6AD0DEC1C1E03B90038D7E8 /* ArrayExtensions.swift */; };
 		B6AD0DEF1C1E0BEB0038D7E8 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6AD0DEE1C1E0BEB0038D7E8 /* SettingsViewController.swift */; };
 		B6AD0DF11C1E2ACB0038D7E8 /* MessageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6AD0DF01C1E2ACB0038D7E8 /* MessageCell.swift */; };
+		B6CA29481D696A7A00EB402A /* MessageCellLeft.xib in Resources */ = {isa = PBXBuildFile; fileRef = B6CA29471D696A7A00EB402A /* MessageCellLeft.xib */; };
+		B6CA294A1D696B1C00EB402A /* MessageCellRight.xib in Resources */ = {isa = PBXBuildFile; fileRef = B6CA29491D696B1C00EB402A /* MessageCellRight.xib */; };
+		B6CA294C1D696B3600EB402A /* MessageCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = B6CA294B1D696B3600EB402A /* MessageCell.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -87,6 +90,9 @@
 		B6C580B41BF2D9300073F458 /* JSONSyntaxHighlight.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JSONSyntaxHighlight.m; sourceTree = "<group>"; };
 		B6C580B51BF2D9300073F458 /* STHTTPRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STHTTPRequest.h; sourceTree = "<group>"; };
 		B6C580B61BF2D9300073F458 /* STHTTPRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STHTTPRequest.m; sourceTree = "<group>"; };
+		B6CA29471D696A7A00EB402A /* MessageCellLeft.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MessageCellLeft.xib; path = "Communiqué/MessageCellLeft.xib"; sourceTree = SOURCE_ROOT; };
+		B6CA29491D696B1C00EB402A /* MessageCellRight.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MessageCellRight.xib; path = "Communiqué/MessageCellRight.xib"; sourceTree = SOURCE_ROOT; };
+		B6CA294B1D696B3600EB402A /* MessageCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MessageCell.xib; path = "Communiqué/MessageCell.xib"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -119,6 +125,9 @@
 				B69ECE101C13AFA500D37108 /* LaunchScreen.storyboard */,
 				B69ECE251C13B01D00D37108 /* Info.plist */,
 				B6AD0DEA1C1E02070038D7E8 /* Bridging.h */,
+				B6CA29471D696A7A00EB402A /* MessageCellLeft.xib */,
+				B6CA29491D696B1C00EB402A /* MessageCellRight.xib */,
+				B6CA294B1D696B3600EB402A /* MessageCell.xib */,
 			);
 			path = "Communiqué";
 			sourceTree = "<group>";
@@ -246,8 +255,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				B69ECE261C13B01D00D37108 /* Info.plist in Resources */,
+				B6CA294C1D696B3600EB402A /* MessageCell.xib in Resources */,
+				B6CA29481D696A7A00EB402A /* MessageCellLeft.xib in Resources */,
 				B69ECE121C13AFA500D37108 /* LaunchScreen.storyboard in Resources */,
 				B69ECE0F1C13AFA500D37108 /* Assets.xcassets in Resources */,
+				B6CA294A1D696B1C00EB402A /* MessageCellRight.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

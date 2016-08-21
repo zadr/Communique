@@ -25,6 +25,7 @@ public class AvatarController: AvatarProvider {
 		}
 
 		if let avatar = avatarFromDisk(person) {
+            cache.setObject(avatar, forKey: person.avatar.lastPathComponent, cost: 1)
 			return avatar
 		}
 
@@ -65,8 +66,6 @@ public class AvatarController: AvatarProvider {
 		guard let avatar = AvatarType(data: avatarData) else {
 			return nil
 		}
-
-		cache.setObject(avatar, forKey: person.avatar.lastPathComponent, cost: avatarData.count)
 
 		return avatar
 	}

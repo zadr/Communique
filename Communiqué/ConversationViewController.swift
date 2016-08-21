@@ -5,6 +5,7 @@ class ConversationListViewController: UITableViewController, SessionDisplay {
 	let sessionController: SessionController
 	let avatarController: AvatarProvider
 	let people: [Person]
+    private var isPullingToRefresh = false
 
 	lazy var textField = UITextField()
 
@@ -29,10 +30,16 @@ class ConversationListViewController: UITableViewController, SessionDisplay {
 	override func viewDidLoad() {
 		super.viewDidLoad()
 
+        [ MessageCell.leftCell, MessageCell.regularCell, MessageCell.rightCell ].forEach {
+            tableView.register(UINib(nibName: $0, bundle: nil), forCellReuseIdentifier: $0)
+        }
+        
 		view.backgroundColor = UIColor.white
 
 		title = people.map({ return $0.displayValue }).joined(separator: ", ")
 		tableView.tableFooterView = UIView()
+        tableView.rowHeight = UITableViewAutomaticDimension
+        tableView.estimatedRowHeight = 44
 
 		refreshControl = UIRefreshControl()
 		refreshControl!.addTarget(self, action: #selector(refresh(_:)), for: [ .valueChanged ])
@@ -52,7 +59,12 @@ class ConversationListViewController: UITableViewController, SessionDisplay {
 			UIBarButtonItem(customView: textField),
 			UIBarButtonItem(title: "Send", style: .plain, target: self, action: #selector(done(_:)))
 		]
-	}
+
+        // work around UITableView weirdness. same fix as http://stackoverflow.com/a/35236138 with a different visible glitch
+        tableView.setNeedsLayout()
+        tableView.layoutIfNeeded()
+        tableView.reloadData()
+    }
 
 	override func viewWillDisappear(_ animated: Bool) {
 		super.viewWillDisappear(animated)
@@ -104,6 +116,7 @@ class ConversationListViewController: UITableViewController, SessionDisplay {
 	}
 
 	@IBAction private func refresh(_ sender: AnyObject? = nil) {
+        isPullingToRefresh = true
 		sessionController.fetch()
 	}
 
@@ -121,7 +134,7 @@ class ConversationListViewController: UITableViewController, SessionDisplay {
 		super.viewWillAppear(animated)
 
 		navigationController?.setToolbarHidden(false, animated: true)
-	}
+    }
 
 	override func viewWillLayoutSubviews() {
 		super.viewWillLayoutSubviews()
@@ -135,8 +148,12 @@ class ConversationListViewController: UITableViewController, SessionDisplay {
 	}
 
 	func sessionController(_ sessionController: SessionController, didLoadItems items: [Item], forFeed: FeedType) {
+        isPullingToRefresh = false
 		tableView.reloadData()
 		refreshControl!.endRefreshing()
+        if !isPullingToRefresh {
+            tableView.scrollToRow(at: IndexPath(row: items.count, section: 0), at: .bottom, animated: false)
+        }
 	}
 
 	private var items: [Item] {
@@ -166,46 +183,36 @@ class ConversationListViewController: UITableViewController, SessionDisplay {
 		return nil
 	}
 
-	override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-		let cell = self.tableView(tableView, cellForRowAt: indexPath)
-
-		cell.setNeedsLayout()
-		cell.layoutIfNeeded()
-
-		return 20.0 + max(cell.detailTextLabel!.frame.size.height, cell.imageView!.frame.size.height)
-	}
-
 	override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
 		return items.count
 	}
 
 	override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-		var cell = tableView.dequeueReusableCell(withIdentifier: "cell") as? MessageCell
-		if cell == nil {
-			cell = MessageCell(style: .subtitle, reuseIdentifier: "cell")
-			cell?.detailTextLabel?.numberOfLines = 0
-		}
+        let item = items.reversed()[indexPath.row]
+        let sentByLoggedInPerson = item.sender.username != sessionController.session.username
 
-		cell?.separatorInset = UIEdgeInsets.zero
+        var identifier: String = MessageCell.regularCell
+        if indexPath.row == 0 {
+            identifier = sentByLoggedInPerson ? MessageCell.leftCell : MessageCell.rightCell
+        } else {
+            let previousItem = items.reversed()[max(0, indexPath.row - 1)]
 
-		let item = items.reversed()[indexPath.row]
-		let previousItem = items.reversed()[max(0, indexPath.row - 1)]
+            if previousItem.sender != item.sender {
+                identifier = sentByLoggedInPerson ? MessageCell.leftCell : MessageCell.rightCell
+            }
+        }
 
-		// WARNING: ugly
-		cell?.imageOnLeft = item.sender.username != sessionController.session.username
+        let cell = tableView.dequeueReusableCell(withIdentifier: identifier) as! MessageCell
+        cell.selectionStyle = .none
+        
+        cell.separatorInset = UIEdgeInsets(top: 0, left: 1000000, bottom: 0, right: 0)
+        cell.textView.text = item.message
+        cell.textView.textAlignment = sentByLoggedInPerson ? .left : .right
+        
+        cell.avatarView?.image = avatarController.avatar(item.sender) { avatar in
+            tableView.reloadRows(at: [ indexPath ], with: .fade)
+        }
 
-		if indexPath.row == 0 || previousItem.sender != item.sender {
-			cell!.imageView!.image = avatarController.avatar(item.sender) { (avatar) -> () in
-				tableView.reloadRows(at: [ indexPath ], with: .fade)
-
-				cell!.setNeedsLayout()
-			}
-		} else {
-			cell!.imageView!.image = nil
-		}
-
-		cell?.detailTextLabel?.text = item.message
-
-		return cell!
+        return cell
 	}
 }
