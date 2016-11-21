@@ -60,7 +60,7 @@ class SettingsViewController: UITableViewController {
 		return cell!
 	}
 
-	@IBAction private func displayNamesToggled(_ sender: AnyObject? = nil) {
+	@IBAction fileprivate func displayNamesToggled(_ sender: AnyObject? = nil) {
 		let value = UserDefaults.standard.bool(forKey: "show-user-names")
 		UserDefaults.standard.set(!value, forKey: "show-user-names")
 	}
@@ -74,7 +74,7 @@ class SettingsViewController: UITableViewController {
 		tableView.deselectRow(at: indexPath, animated: true)
 	}
 
-	@IBAction private func close(_ sender: AnyObject? = nil) {
+	@IBAction fileprivate func close(_ sender: AnyObject? = nil) {
 		navigationController!.dismiss(animated: true, completion: nil)
 	}
 }

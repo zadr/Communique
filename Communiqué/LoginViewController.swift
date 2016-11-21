@@ -30,7 +30,7 @@ public class LoginViewController: UIViewController {
 		button.center = view.center
 	}
 
-	@IBAction private func login(_ sender: AnyObject?) {
+	@IBAction fileprivate func login(_ sender: AnyObject?) {
 		client.login()
 	}
 }

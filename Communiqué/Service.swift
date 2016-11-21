@@ -18,16 +18,16 @@ public protocol Client {
 public protocol OAuthClient: Client {
 	var loginHelper: LoginHelper? { get set }
 
-	func handleLoginResponse(_ response: [String: AnyObject])
+	func handleLoginResponse(_ response: [String: Any])
 }
 
 public enum FeedType: Int {
 	case home // all followers activity
 	case userActivity // @replies, or activity feed
-	case personalMessages // private messages
+	case personalMessages // fileprivate messages
 }
 
-public typealias FetchResponse = ([Item]?, NSError?) -> ()
+public typealias FetchResponse = ([Item]?, Error?) -> ()
 
 public protocol Session {
 	func fetch(_ feed: FeedType, since: String?, handler: FetchResponse?)
@@ -49,7 +49,7 @@ public class Person: Equatable {
 	let following: Bool
 	let location: String
 
-	init(dictionary: [String: AnyObject]) {
+	init(dictionary: [String: Any]) {
 		avatar = URL(string: dictionary["profile_image_url_https"] as! String)!
 		displayName = dictionary["name"] as! String
 		username = dictionary["screen_name"] as! String
@@ -71,10 +71,10 @@ public class Item: Equatable {
 	let date: String
 	let id: String
 
-	init(dictionary: [String: AnyObject]) {
-		sender = Person(dictionary: dictionary["sender"] as! [String: AnyObject])
+	init(dictionary: [String: Any]) {
+		sender = Person(dictionary: dictionary["sender"] as! [String: Any])
 		people = [
-			Person(dictionary: dictionary["recipient"] as! [String: AnyObject])
+			Person(dictionary: dictionary["recipient"] as! [String: Any])
 		]
 		message = dictionary["text"] as! String
 		date = dictionary["created_at"] as! String

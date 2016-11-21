@@ -11,8 +11,8 @@ public class Twitter {
 
 	public weak var loginHelper: LoginHelper?
 
-	private lazy var keychain: KeychainEssentials = Keychain()
-	private lazy var _sessions: [String: STTwitterAPI] = {
+	fileprivate lazy var keychain: KeychainEssentials = Keychain()
+	fileprivate lazy var _sessions: [String: STTwitterAPI] = {
 		var sessions = [String: STTwitterAPI]()
 
 		let accountsString = self.keychain.passwordForServer(loggedInAccounts, area: "app")
@@ -62,7 +62,7 @@ extension Twitter: Client {
 }
 
 extension Twitter: OAuthClient {
-	public func handleLoginResponse(_ response: [String: AnyObject]) {
+	public func handleLoginResponse(_ response: [String: Any]) {
 		print("response", response)
 		guard let token = response["oauth_token"] as? String else {
 			print("no token")
@@ -158,7 +158,7 @@ extension STTwitterAPI: Session {
 
 	func fetchHomeFeed(_ since: String? = nil, limit: UInt = 200, handler: FetchResponse?) {
 		getHomeTimeline(sinceID: since, count: limit, successBlock: { (activity) -> () in
-			let items = activity.map({ return Item(dictionary: $0 as! [String: AnyObject]) })
+			let items = activity.map({ return Item(dictionary: $0 as! [String: Any]) })
 			if let handler = handler { handler(items, nil) }
 		}) { error in
 			if let handler = handler { handler(nil, error) }
@@ -168,7 +168,7 @@ extension STTwitterAPI: Session {
 
 	func fetchUserActivityFeed(_ since: String? = nil, limit: UInt = 200, handler: FetchResponse?) {
 		getMentionsTimeline(sinceID: since, count: limit, successBlock: { (activity) -> () in
-			let items = activity.map({ return Item(dictionary: $0 as! [String: AnyObject]) })
+			let items = activity.map({ return Item(dictionary: $0 as! [String: Any]) })
 			if let handler = handler { handler(items, nil) }
 		}) { error in
 			if let handler = handler { handler(nil, error) }
@@ -178,7 +178,7 @@ extension STTwitterAPI: Session {
 
 	func fetchUserReceivedPersonalMessagesFeed(_ since: String? = nil, limit: UInt = 200, handler: FetchResponse?) {
 		getDirectMessages(sinceID: since, count: limit, successBlock: { (mentions) -> () in
-			let items = mentions.map({ return Item(dictionary: $0 as! [String: AnyObject]) })
+			let items = mentions.map({ return Item(dictionary: $0 as! [String: Any]) })
 			if let handler = handler { handler(items, nil) }
 		}) { error in
 			if let handler = handler { handler(nil, error) }
@@ -188,7 +188,7 @@ extension STTwitterAPI: Session {
 
 	func fetchUserSentPersonalMessagesFeed(_ since: String? = nil, limit: UInt = 200, handler: FetchResponse?) {
 		getDirectMessages(sinceID: since, maxID: nil, count: String(limit), fullText: true, page: nil, includeEntities: true, successBlock: { (mentions) -> () in
-			let items = mentions.map({ return Item(dictionary: $0 as! [String: AnyObject]) })
+			let items = mentions.map({ return Item(dictionary: $0 as! [String: Any]) })
 			if let handler = handler { handler(items, nil) }
 		}) { (error) -> () in
 			if let handler = handler { handler(nil, error) }

@@ -20,9 +20,9 @@ public protocol SessionControllerType: class {
 
 public class SessionController: NSObject, FeedLoading, SessionControllerType {
 	public let session: Session
-	private let feedControllers: [FeedController]
+	fileprivate let feedControllers: [FeedController]
 
-	private var observers = [SessionDisplay]()
+	fileprivate var observers = [SessionDisplay]()
 
 	public required init(session: Session, feedTypes: [FeedType]) {
 		self.session = session
@@ -108,12 +108,12 @@ internal protocol FeedLoader {
 }
 
 internal class FeedController: FeedLoader {
-	private let session: Session
-	private let feedType: FeedType
+	fileprivate let session: Session
+	fileprivate let feedType: FeedType
 
 	internal var feedLoading: FeedLoading?
 
-	private var since: String?
+	fileprivate var since: String?
 	internal var items = [Item]()
 
 	init(session: Session, feedType: FeedType) {
@@ -138,7 +138,7 @@ internal class FeedController: FeedLoader {
 	}
 
 	internal func fetch() {
-		session.fetch(feedType, since: since, handler: { (items: [Item]?, error: NSError?) in
+		session.fetch(feedType, since: since, handler: { (items: [Item]?, error: Error?) in
 			if let feedLoading = self.feedLoading, let items = items {
 				if !items.isEmpty {
 					self.since = items.last!.date

@@ -5,7 +5,7 @@ class ConversationListViewController: UITableViewController, SessionDisplay {
 	let sessionController: SessionController
 	let avatarController: AvatarProvider
 	let people: [Person]
-    private var isPullingToRefresh = false
+    fileprivate var isPullingToRefresh = false
 
 	lazy var textField = UITextField()
 
@@ -75,7 +75,7 @@ class ConversationListViewController: UITableViewController, SessionDisplay {
 		NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
 	}
 
-	@objc private func keyboardWillShow(_ notification: Notification) {
+	@objc fileprivate func keyboardWillShow(_ notification: Notification) {
 		let keyboardRectValue = (notification).userInfo![UIKeyboardFrameEndUserInfoKey] as! NSValue
 		let keyboardRect = keyboardRectValue.cgRectValue
 
@@ -94,7 +94,7 @@ class ConversationListViewController: UITableViewController, SessionDisplay {
 		}, completion: nil)
 	}
 
-	@objc private func keyboardWillHide(_ notification: Notification) {
+	@objc fileprivate func keyboardWillHide(_ notification: Notification) {
 		let animationDurationValue = (notification).userInfo![UIKeyboardAnimationDurationUserInfoKey] as! NSNumber
 		let animationDuration = animationDurationValue.doubleValue
 
@@ -109,18 +109,18 @@ class ConversationListViewController: UITableViewController, SessionDisplay {
 		}, completion: nil)
 	}
 
-	private func resetNavigationControllerFrame() {
+	fileprivate func resetNavigationControllerFrame() {
 		var frame = navigationController!.view.frame
 		frame.size.height = UIApplication.shared.keyWindow!.frame.height
 		navigationController!.view.frame = frame
 	}
 
-	@IBAction private func refresh(_ sender: AnyObject? = nil) {
+	@IBAction fileprivate func refresh(_ sender: AnyObject? = nil) {
         isPullingToRefresh = true
 		sessionController.fetch()
 	}
 
-	@IBAction private func done(_ sender: AnyObject? = nil) {
+	@IBAction fileprivate func done(_ sender: AnyObject? = nil) {
 		textField.resignFirstResponder()
 
 		if let text = textField.text, text.utf8.count > 0 {
@@ -156,7 +156,7 @@ class ConversationListViewController: UITableViewController, SessionDisplay {
         }
 	}
 
-	private var items: [Item] {
+	fileprivate var items: [Item] {
         let items = sessionController.itemsForFeedType(.personalMessages)
         return items.filter({
             let to = people.contains($0.sender)

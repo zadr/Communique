@@ -7,8 +7,8 @@ protocol KeychainEssentials {
 }
 
 public class Keychain: KeychainEssentials {
-	private func keychainDictionary(_ server: String, account: String?) -> [String: AnyObject] {
-		var dictionary = [String: AnyObject]()
+	fileprivate func keychainDictionary(_ server: String, account: String?) -> [String: Any] {
+		var dictionary = [String: Any]()
 		dictionary[String(kSecClass)] = String(kSecClassInternetPassword)
 		dictionary[String(kSecAttrServer)] = server
 
@@ -33,7 +33,7 @@ public class Keychain: KeychainEssentials {
 
 		let status = SecItemAdd(entry as NSDictionary, nil)
 		if status == errSecDuplicateItem {
-			let update: [String: AnyObject] = [String(kSecValueData): entry[String(kSecValueData)]!]
+			let update: [String: Any] = [String(kSecValueData): entry[String(kSecValueData)]!]
 
 			entry.removeValue(forKey: String(kSecValueData))
 

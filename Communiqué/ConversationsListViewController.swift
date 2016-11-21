@@ -59,7 +59,7 @@ class ConversationsListViewController<T: SessionController, U: AvatarProvider>: 
 		refreshControl!.endRefreshing()
 	}
 
-	@IBAction private func refresh(_ sender: AnyObject? = nil) {
+	@IBAction fileprivate func refresh(_ sender: AnyObject? = nil) {
 		sessionController.forEach { $0.fetch() }
 	}
 

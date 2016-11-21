@@ -10,22 +10,22 @@
 
 public protocol AvatarProvider {
 	init()
-	func avatar(_ person: Person, completion: () -> ()) -> AvatarType?
+	func avatar(_ person: Person, completion: @escaping () -> ()) -> AvatarType?
 }
 
 public class AvatarController: AvatarProvider {
-	private var cache = NSCache<NSString, AvatarType>()
-	private lazy var fetching = Set<URL>()
+    fileprivate var cache = [String: AvatarType]()
+	fileprivate lazy var fetching = Set<URL>()
 
 	public required init() {}
 
-	public func avatar(_ person: Person, completion: () -> ()) -> AvatarType? {
+	public func avatar(_ person: Person, completion: @escaping () -> ()) -> AvatarType? {
 		if let avatar = avatarFromMemory(person) {
 			return avatar
 		}
 
 		if let avatar = avatarFromDisk(person) {
-            cache.setObject(avatar, forKey: person.avatar.lastPathComponent, cost: 1)
+            cache[person.avatar.lastPathComponent] = avatar
 			return avatar
 		}
 
@@ -50,11 +50,11 @@ public class AvatarController: AvatarProvider {
 		return nil
 	}
 
-	private func avatarFromMemory(_ person: Person) -> AvatarType? {
-		return cache.object(forKey: person.avatar.lastPathComponent)
+	fileprivate func avatarFromMemory(_ person: Person) -> AvatarType? {
+        return cache[person.avatar.lastPathComponent]
 	}
 
-	private func avatarFromDisk(_ person: Person) -> AvatarType? {
+	fileprivate func avatarFromDisk(_ person: Person) -> AvatarType? {
 		guard let avatarPath = localPath(person) else {
 			return nil
 		}
@@ -70,7 +70,7 @@ public class AvatarController: AvatarProvider {
 		return avatar
 	}
 
-	private func saveAvatar(_ data: Data, forPerson person: Person) {
+	fileprivate func saveAvatar(_ data: Data, forPerson person: Person) {
 		let fileManger = FileManager()
 		let avatarCacheDirectory = cacheDirectory()!
 		if !fileManger.fileExists(atPath: avatarCacheDirectory.absoluteString) {
@@ -82,7 +82,7 @@ public class AvatarController: AvatarProvider {
 		}
 	}
 
-	private func cacheDirectory() -> URL? {
+	fileprivate func cacheDirectory() -> URL? {
 		guard let cacheDirectory = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first else {
 			return nil
 		}
@@ -90,7 +90,7 @@ public class AvatarController: AvatarProvider {
 		return URL(fileURLWithPath: cacheDirectory).appendingPathComponent("Avatars")
 	}
 
-	private func localPath(_ person: Person) -> URL? {
+	fileprivate func localPath(_ person: Person) -> URL? {
 		guard let avatarDirectory = cacheDirectory() else {
 			return nil
 		}
