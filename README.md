@@ -15,3 +15,5 @@ The networking layer is built on top of [STTwitter](https://github.com/nst/STTwi
 Although I don't see this as a project to be worked on for a long time, any contributors should follow the Contributor Code of Conduct, v1.3.0: http://contributor-covenant.org/version/1/3/0/
 
 And finally, there are no screenshots available, because I'm not sharing my private chat with the entire internet. I like to think that Communiqué looks okay for what it is, though.
+
+P.S. Set a callback url on your app in twitter otherwise you'll get 401's after signing in. It's weird, don't ask me.
